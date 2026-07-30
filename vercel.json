@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/stripe-poll",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
