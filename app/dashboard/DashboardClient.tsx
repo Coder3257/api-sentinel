@@ -27,9 +27,10 @@ interface DashboardClientProps {
   totalScans: number;
   totalPRs: number;
   scans: ScanRow[];
+  userRepos: Repo[];
 }
 
-export default function DashboardClient({ totalRepos, totalScans, totalPRs, scans }: DashboardClientProps) {
+export default function DashboardClient({ totalRepos, totalScans, totalPRs, scans, userRepos }: DashboardClientProps) {
   const [activeModal, setActiveModal] = useState<{ title: string; content: string } | null>(null);
   const [expandedScan, setExpandedScan] = useState<string | null>(null);
 
@@ -113,6 +114,98 @@ export default function DashboardClient({ totalRepos, totalScans, totalPRs, scan
             </Link>
           </div>
         </header>
+
+        {/* Onboarding / Connection Status Banner */}
+        {userRepos.length === 0 ? (
+          <div
+            style={{
+              background: "var(--accent-glow)",
+              border: "1px solid var(--border-strong)",
+              borderRadius: "16px",
+              padding: "24px 32px",
+              marginBottom: "32px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "16px",
+            }}
+          >
+            <div style={{ textAlign: "left" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text)", margin: 0 }}>
+                No Repositories Connected
+              </h3>
+              <p style={{ color: "var(--text-secondary)", fontSize: "14px", margin: "4px 0 0" }}>
+                Install the GitHub App to enable automated dependency scans and PR updates.
+              </p>
+            </div>
+            <Link
+              href="/connect"
+              className="btn-hover"
+              style={{
+                padding: "10px 20px",
+                background: "var(--gradient-brand)",
+                borderRadius: "8px",
+                color: "#ffffff",
+                fontWeight: 600,
+                fontSize: "14px",
+                textDecoration: "none",
+                boxShadow: "0 4px 12px var(--accent-glow)",
+              }}
+            >
+              Connect Repository
+            </Link>
+          </div>
+        ) : (
+          <div
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border)",
+              borderRadius: "16px",
+              padding: "16px 24px",
+              marginBottom: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text)" }}>Connected Repositories:</span>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {userRepos.map((repo, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      fontSize: "12px",
+                      background: "var(--bg-inset)",
+                      border: "1px solid var(--border)",
+                      padding: "4px 10px",
+                      borderRadius: "6px",
+                      color: "var(--text-secondary)",
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    {repo.owner}/{repo.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <Link
+              href="/connect"
+              style={{
+                fontSize: "13px",
+                color: "var(--accent)",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              Manage Repositories &rarr;
+            </Link>
+          </div>
+        )}
+
 
         {/* Stats Grid */}
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", marginBottom: "48px" }}>

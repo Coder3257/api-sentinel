@@ -31,9 +31,10 @@ export default async function DashboardPage() {
   }
 
   const supabase = getSupabaseClient();
+  const userId = (session.user as any).id;
 
-  // Fetch counts in parallel
-  const [reposRes, scansRes, prsRes, scansListRes] = await Promise.all([
+  // Fetch counts, scans list, and user repos in parallel
+  const [reposRes, scansRes, prsRes, scansListRes, userReposRes] = await Promise.all([
     supabase.from("repos").select("id", { count: "exact", head: true }),
     supabase.from("scans").select("id", { count: "exact", head: true }),
     supabase.from("pull_requests").select("id", { count: "exact", head: true }),
@@ -53,13 +54,18 @@ export default async function DashboardPage() {
         )
       `)
       .order("created_at", { ascending: false })
-      .limit(10)
+      .limit(10),
+    supabase
+      .from("repos")
+      .select("owner, name")
+      .eq("user_id", userId)
   ]);
 
   const totalRepos = reposRes.count || 0;
   const totalScans = scansRes.count || 0;
   const totalPRs = prsRes.count || 0;
   const scans = (scansListRes.data as unknown as ScanRow[]) || [];
+  const userRepos = (userReposRes.data as unknown as Repo[]) || [];
 
   return (
     <DashboardClient
@@ -67,6 +73,8 @@ export default async function DashboardPage() {
       totalScans={totalScans}
       totalPRs={totalPRs}
       scans={scans}
+      userRepos={userRepos}
     />
   );
 }
+

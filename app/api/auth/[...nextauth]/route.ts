@@ -36,7 +36,17 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       if (session.user && token.sub) {
-        (session.user as any).id = token.sub;
+        const supabase = getSupabaseClient();
+        const { data } = await supabase
+          .from("users")
+          .select("id, github_username")
+          .eq("github_id", parseInt(token.sub))
+          .single();
+        
+        if (data) {
+          (session.user as any).id = data.id;
+          (session.user as any).github_username = data.github_username;
+        }
       }
       return session;
     },
