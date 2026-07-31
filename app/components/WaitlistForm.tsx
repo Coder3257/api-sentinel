@@ -50,10 +50,10 @@ export default function WaitlistForm() {
             flex: 1,
             minWidth: "240px",
             padding: "14px 16px",
-            background: "rgba(0, 0, 0, 0.4)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
+            background: "rgba(0, 0, 0, 0.2)",
+            border: "1px solid var(--border)",
             borderRadius: "10px",
-            color: "#ffffff",
+            color: "var(--text)",
             fontSize: "15px",
             outline: "none",
             transition: "border-color 0.2s",
@@ -64,7 +64,7 @@ export default function WaitlistForm() {
           disabled={status === "loading" || status === "success"}
           style={{
             padding: "14px 24px",
-            background: status === "success" ? "#10b981" : "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+            background: status === "success" ? "var(--accent)" : "var(--gradient-brand)",
             border: "none",
             borderRadius: "10px",
             color: "#ffffff",
@@ -72,7 +72,7 @@ export default function WaitlistForm() {
             fontSize: "15px",
             cursor: (status === "loading" || status === "success") ? "not-allowed" : "pointer",
             opacity: (status === "loading" || status === "success") ? 0.7 : 1,
-            boxShadow: "0 4px 12px rgba(6, 182, 212, 0.2)",
+            boxShadow: "0 4px 12px var(--accent-glow)",
             transition: "all 0.3s ease",
           }}
         >
@@ -94,11 +94,11 @@ export default function WaitlistForm() {
         {status === "success" && (
           <div
             style={{
-              background: "rgba(16, 185, 129, 0.1)",
-              border: "1px solid rgba(16, 185, 129, 0.2)",
+              background: "var(--accent-glow)",
+              border: "1px solid var(--border-strong)",
               padding: "12px 18px",
               borderRadius: "10px",
-              color: "#10b981",
+              color: "var(--accent)",
               fontWeight: 600,
               fontSize: "14px",
               width: "100%",
