@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { signIn, signOut, useSession } from "next-auth/react";
 import WaitlistForm from "@/app/components/WaitlistForm";
 import Reveal from "@/app/components/Reveal";
 import ThemeToggle from "@/app/components/ThemeToggle";
@@ -9,6 +10,7 @@ import DemoWidget from "@/app/components/DemoWidget";
 
 export default function Home() {
   const [activeModal, setActiveModal] = useState<{ title: string; content: string } | null>(null);
+  const { data: session, status } = useSession();
 
   return (
     <div style={{ background: "var(--bg)", color: "var(--text)", minHeight: "100vh", fontFamily: "var(--font-sans)", position: "relative", overflow: "hidden" }}>
@@ -89,25 +91,69 @@ export default function Home() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <ThemeToggle />
-            <Link
-              href="/dashboard"
-              className="btn-hover"
-              style={{
-                padding: "10px 20px",
-                background: "var(--bg-elevated)",
-                border: "1px solid var(--border)",
-                borderRadius: "8px",
-                fontWeight: 600,
-                fontSize: "14px",
-                color: "var(--text)",
-                transition: "all 0.2s",
-              }}
-            >
-              Go to Dashboard
-            </Link>
+            {status === "authenticated" ? (
+              <>
+                <span style={{ fontSize: "14px", color: "var(--text-secondary)", fontWeight: 555 }}>
+                  {session.user?.name || "User"}
+                </span>
+                <Link
+                  href="/dashboard"
+                  className="btn-hover"
+                  style={{
+                    padding: "10px 20px",
+                    background: "var(--bg-elevated)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                    fontWeight: 600,
+                    fontSize: "14px",
+                    color: "var(--text)",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => signOut()}
+                  className="btn-hover"
+                  style={{
+                    padding: "10px 20px",
+                    background: "none",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                    fontWeight: 600,
+                    fontSize: "14px",
+                    color: "var(--text-muted)",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => signIn("github")}
+                className="btn-hover"
+                style={{
+                  padding: "10px 20px",
+                  background: "var(--gradient-brand)",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  fontSize: "14px",
+                  color: "#ffffff",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px var(--accent-glow)",
+                  transition: "all 0.2s",
+                }}
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       </header>
+
 
       {/* Main Container */}
       <main style={{ position: "relative", zIndex: 1, maxWidth: "1120px", margin: "0 auto", padding: "100px 24px 80px", textAlign: "center" }}>
