@@ -1,211 +1,184 @@
-import ThemeToggle from "./components/ThemeToggle";
-import styles from "./page.module.css";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <div className={styles.bgGlow} aria-hidden />
+    <div style={{ background: "#060913", color: "#f3f4f6", minHeight: "100vh", fontFamily: "var(--font-geist-sans), system-ui, -apple-system, sans-serif", position: "relative", overflow: "hidden" }}>
+      {/* Dark UI Glowing Gradient Orb Accents (Cyan/Emerald) */}
+      <div
+        style={{
+          position: "absolute",
+          top: "-20%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "70vw",
+          height: "70vw",
+          maxWidth: "800px",
+          maxHeight: "800px",
+          background: "radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.04) 50%, rgba(0,0,0,0) 100%)",
+          borderRadius: "50%",
+          pointerEvents: "none",
+          filter: "blur(80px)",
+          zIndex: 0,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-10%",
+          right: "-10%",
+          width: "40vw",
+          height: "40vw",
+          maxWidth: "500px",
+          background: "radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(0,0,0,0) 70%)",
+          borderRadius: "50%",
+          pointerEvents: "none",
+          filter: "blur(80px)",
+          zIndex: 0,
+        }}
+      />
 
-      {/* ── Nav ─────────────────────────────────────────────────────────── */}
-      <header className={styles.nav}>
-        <div className={styles.navInner}>
-          <a href="#top" className={styles.brand}>
-            <span className={styles.brandMark} aria-hidden />
-            <span className={styles.brandName}>API&nbsp;Sentinel</span>
-          </a>
-          <nav className={styles.navLinks}>
-            <a href="#how">How it works</a>
-            <a href="#features">Features</a>
-            <a href="#severity">Coverage</a>
-          </nav>
-          <div className={styles.navActions}>
-            <ThemeToggle />
-            <a href="#cta" className={styles.btnGhost}>Sign in</a>
-            <a href="#cta" className={styles.btnPrimary}>Connect repo</a>
+      {/* Navigation */}
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          backdropFilter: "blur(12px)",
+          background: "rgba(6, 9, 19, 0.8)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+          padding: "16px 24px",
+        }}
+      >
+        <div style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontWeight: 700, fontSize: "18px", letterSpacing: "-0.02em" }}>
+            <span style={{ width: "20px", height: "20px", borderRadius: "6px", background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)", boxShadow: "0 0 12px rgba(6, 182, 212, 0.5)" }} />
+            <span>API Sentinel</span>
           </div>
+          <Link
+            href="/dashboard"
+            style={{
+              padding: "10px 20px",
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRadius: "8px",
+              fontWeight: 600,
+              fontSize: "14px",
+              color: "white",
+              transition: "all 0.2s",
+            }}
+          >
+            Go to Dashboard
+          </Link>
         </div>
       </header>
 
-      <main id="top">
-        {/* ── Hero ──────────────────────────────────────────────────────── */}
-        <section className={styles.hero}>
-          <a href="#how" className={styles.eyebrow}>
-            <span className={styles.eyebrowDot} aria-hidden />
-            Now watching the Stripe OpenAPI spec, live
-          </a>
-          <h1 className={styles.heroTitle}>
-            Ship through Stripe API changes
-            <br />
-            <span className={styles.gradientText}>before they break your build</span>
-          </h1>
-          <p className={styles.heroSub}>
-            API Sentinel watches the Stripe OpenAPI spec around the clock. When a
-            breaking or deprecated change lands, it finds every line of your code
-            that depends on it, writes the fix, and opens a verified pull request —
-            before your next deploy ever fails.
-          </p>
-          <div className={styles.heroCtas}>
-            <a href="#cta" className={styles.btnPrimaryLg}>
-              Connect your repo
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </a>
-            <a href="#how" className={styles.btnGhostLg}>See how it works</a>
-          </div>
-          <p className={styles.heroFoot}>
-            Installs as a GitHub App · Read-only scan · Opens draft PRs you approve
-          </p>
+      {/* Hero Section */}
+      <main style={{ position: "relative", zIndex: 1, maxWidth: "1120px", margin: "0 auto", padding: "120px 24px 80px", textAlign: "center" }}>
+        <h1
+          style={{
+            fontSize: "clamp(44px, 7vw, 76px)",
+            fontWeight: 800,
+            letterSpacing: "-0.04em",
+            lineHeight: 1.05,
+            marginBottom: "24px",
+            color: "#ffffff",
+          }}
+        >
+          Your API dependencies<br />
+          <span style={{ background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            patch themselves.
+          </span>
+        </h1>
+        <p
+          style={{
+            fontSize: "clamp(17px, 2.2vw, 21px)",
+            color: "#9ca3af",
+            maxWidth: "640px",
+            margin: "0 auto 40px",
+            lineHeight: 1.6,
+          }}
+        >
+          Continuous monitoring of OpenAPI changes. Automated compatibility scans. AI-generated patches delivered via verified pull requests.
+        </p>
 
-          {/* Signature visual — the PR it opens */}
-          <div className={styles.prCard}>
-            <div className={styles.prHeader}>
-              <span className={styles.prIcon} aria-hidden>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M18 9a9 9 0 0 1-9 9" /><circle cx="18" cy="6" r="3" /></svg>
-              </span>
-              <span className={styles.prTitle}>
-                fix: migrate <code>charges.create</code> to <code>paymentIntents</code> (Stripe 2025-06)
-              </span>
-              <span className={`${styles.prBadge} ${styles.prBadgeReady}`}>Checks passed</span>
+        <div style={{ display: "flex", gap: "16px", justifyContent: "center", marginBottom: "80px" }}>
+          <Link
+            href="/dashboard"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "16px 32px",
+              fontSize: "16px",
+              fontWeight: 600,
+              color: "#ffffff",
+              background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+              borderRadius: "10px",
+              boxShadow: "0 8px 28px rgba(6, 182, 212, 0.25)",
+              transition: "all 0.2s",
+            }}
+          >
+            Open Dashboard
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </Link>
+        </div>
+
+        {/* Card-based Stat Displays with Subtle Glow Borders */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", marginTop: "40px" }}>
+          {[
+            { stat: "Continuous", label: "Stripe changelog monitoring" },
+            { stat: "Zero Noise", label: "Patches only for breaking changes" },
+            { stat: "Automated", label: "Tested pull requests in minutes" },
+          ].map((item, i) => (
+            <div
+              key={i}
+              style={{
+                background: "#0a0d16",
+                border: "1px solid rgba(6, 182, 212, 0.15)",
+                borderRadius: "16px",
+                padding: "32px",
+                textAlign: "center",
+                boxShadow: "0 8px 30px rgba(6, 182, 212, 0.03), inset 0 0 16px rgba(6, 182, 212, 0.02)",
+                position: "relative",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "16px",
+                  padding: "1px",
+                  background: "linear-gradient(135deg, rgba(6, 182, 212, 0.3) 0%, rgba(16, 185, 129, 0) 100%)",
+                  WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  WebkitMaskComposite: "xor",
+                  maskComposite: "exclude",
+                  pointerEvents: "none",
+                }}
+              />
+              <div
+                style={{
+                  fontSize: "36px",
+                  fontWeight: 800,
+                  background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  marginBottom: "8px",
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                {item.stat}
+              </div>
+              <div style={{ color: "#6b7280", fontSize: "14px", fontWeight: 550, letterSpacing: "0.01em" }}>{item.label}</div>
             </div>
-            <div className={styles.prMeta}>
-              <span className={`${styles.sevPill} ${styles.sevBreaking}`}>Breaking</span>
-              <span className={styles.prMetaText}>opened by api-sentinel[bot] · 2 files · verified in CI</span>
-            </div>
-            <pre className={styles.diff}>
-              <code>
-                <span className={styles.diffPath}>lib/payments.ts</span>{"\n"}
-                <span className={styles.diffDel}>- const charge = await stripe.charges.create({"{"}</span>{"\n"}
-                <span className={styles.diffDel}>-   amount, currency: &apos;usd&apos;, source: token,</span>{"\n"}
-                <span className={styles.diffDel}>- {"}"});</span>{"\n"}
-                <span className={styles.diffAdd}>+ const intent = await stripe.paymentIntents.create({"{"}</span>{"\n"}
-                <span className={styles.diffAdd}>+   amount, currency: &apos;usd&apos;, payment_method: token,</span>{"\n"}
-                <span className={styles.diffAdd}>+   confirm: true,</span>{"\n"}
-                <span className={styles.diffAdd}>+ {"}"});</span>{"\n"}
-              </code>
-            </pre>
-          </div>
-        </section>
-
-        {/* ── Trust strip ───────────────────────────────────────────────── */}
-        <section className={styles.trust}>
-          <p>Built for teams shipping on Stripe</p>
-          <div className={styles.trustLogos}>
-            <span>Payments</span>
-            <span>Billing</span>
-            <span>Connect</span>
-            <span>Checkout</span>
-            <span>Terminal</span>
-          </div>
-        </section>
-
-        {/* ── How it works ──────────────────────────────────────────────── */}
-        <section id="how" className={styles.section}>
-          <div className={styles.sectionHead}>
-            <span className={styles.kicker}>How it works</span>
-            <h2 className={styles.sectionTitle}>Four steps, zero babysitting</h2>
-            <p className={styles.sectionSub}>
-              From spec change to a merge-ready pull request — the whole loop runs
-              on its own and stops for you only when it matters.
-            </p>
-          </div>
-          <ol className={styles.steps}>
-            {[
-              { n: "01", t: "Watch the spec", d: "We diff the Stripe OpenAPI spec continuously and classify every change as breaking, deprecation, or additive." },
-              { n: "02", t: "Scan your code", d: "A read-only pass over your repo maps each affected endpoint to the exact files and lines that call it." },
-              { n: "03", t: "Write the fix", d: "An AI patch is generated for the impacted call sites, matching your style and the new API shape." },
-              { n: "04", t: "Verify, then PR", d: "We open a draft PR, run it through the GitHub Checks API, and promote it to ready only once CI is green." },
-            ].map((s) => (
-              <li key={s.n} className={styles.step}>
-                <span className={styles.stepNum}>{s.n}</span>
-                <h3 className={styles.stepTitle}>{s.t}</h3>
-                <p className={styles.stepText}>{s.d}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* ── Features ──────────────────────────────────────────────────── */}
-        <section id="features" className={styles.section}>
-          <div className={styles.sectionHead}>
-            <span className={styles.kicker}>Why API Sentinel</span>
-            <h2 className={styles.sectionTitle}>A safety net that writes the fix</h2>
-          </div>
-          <div className={styles.featureGrid}>
-            {[
-              { t: "Verified before ready", d: "Every patch opens as a draft and is promoted to ready-for-review only after the GitHub Checks API confirms your suite is green. No blind commits.", big: true },
-              { t: "Real severity, not noise", d: "Changes are triaged as breaking, deprecation, or additive so you only get pinged for what can actually take you down." },
-              { t: "Style-matched patches", d: "Fixes follow the conventions already in your codebase — not a generic rewrite." },
-              { t: "Read-only by default", d: "The scan never writes to your source. It proposes; you approve and merge." },
-              { t: "Deploys before it breaks", d: "The loop runs on Stripe's release cadence, so the PR is waiting before your build ever hits the new spec." },
-            ].map((f, i) => (
-              <article key={i} className={`${styles.feature} ${f.big ? styles.featureBig : ""}`}>
-                <h3 className={styles.featureTitle}>{f.t}</h3>
-                <p className={styles.featureText}>{f.d}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Severity / coverage band ──────────────────────────────────── */}
-        <section id="severity" className={styles.section}>
-          <div className={styles.sectionHead}>
-            <span className={styles.kicker}>Coverage</span>
-            <h2 className={styles.sectionTitle}>Every change, classified</h2>
-          </div>
-          <div className={styles.sevGrid}>
-            <div className={`${styles.sevCard} ${styles.sevCardBreaking}`}>
-              <span className={`${styles.sevPill} ${styles.sevBreaking}`}>Breaking</span>
-              <h3>Fix it now</h3>
-              <p>Removed fields, renamed endpoints, changed types. We open a PR the moment it lands.</p>
-            </div>
-            <div className={`${styles.sevCard} ${styles.sevCardDep}`}>
-              <span className={`${styles.sevPill} ${styles.sevDep}`}>Deprecation</span>
-              <h3>Fix it soon</h3>
-              <p>Endpoints on the way out. Scheduled migrations before the sunset date arrives.</p>
-            </div>
-            <div className={`${styles.sevCard} ${styles.sevCardAdd}`}>
-              <span className={`${styles.sevPill} ${styles.sevAdd}`}>Additive</span>
-              <h3>Good to know</h3>
-              <p>New optional params and endpoints. Logged, never noisy — no PR unless you want one.</p>
-            </div>
-          </div>
-
-          <div className={styles.statBand}>
-            <div className={styles.stat}><strong>&lt; 1 hr</strong><span>from spec change to PR</span></div>
-            <div className={styles.stat}><strong>100%</strong><span>patches CI-verified</span></div>
-            <div className={styles.stat}><strong>0</strong><span>broken deploys from Stripe</span></div>
-          </div>
-        </section>
-
-        {/* ── CTA band ──────────────────────────────────────────────────── */}
-        <section id="cta" className={styles.ctaBand}>
-          <div className={styles.ctaGlow} aria-hidden />
-          <h2 className={styles.ctaTitle}>
-            Never get paged for a Stripe change again
-          </h2>
-          <p className={styles.ctaSub}>
-            Connect a repo in two minutes. The next breaking change shows up as a
-            reviewed pull request — not a production incident.
-          </p>
-          <div className={styles.heroCtas}>
-            <a href="#" className={styles.btnPrimaryLg}>
-              Connect your repo
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </a>
-            <a href="#how" className={styles.btnGhostLg}>Read the docs</a>
-          </div>
-        </section>
+          ))}
+        </div>
       </main>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div className={styles.brand}>
-            <span className={styles.brandMark} aria-hidden />
-            <span className={styles.brandName}>API&nbsp;Sentinel</span>
-          </div>
-          <p className={styles.footerCopy}>
-            © {new Date().getFullYear()} API Sentinel · Ship through the changes.
-          </p>
+      {/* Footer */}
+      <footer style={{ borderTop: "1px solid rgba(255, 255, 255, 0.05)", padding: "40px 24px", marginTop: "100px", background: "#05070e" }}>
+        <div style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontWeight: 700, color: "#9ca3af", fontSize: "15px", letterSpacing: "-0.01em" }}>API Sentinel</span>
+          <span style={{ fontSize: "13px", color: "#4b5563" }}>&copy; {new Date().getFullYear()}</span>
         </div>
       </footer>
     </div>
