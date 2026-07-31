@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
+    console.log("[DIAGNOSTIC] Session found in /api/connect/link:", JSON.stringify(session));
+
     if (!session || !(session.user as any).id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

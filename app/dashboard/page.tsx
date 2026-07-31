@@ -1,6 +1,7 @@
 import { getSupabaseClient } from "@/lib/supabase/client";
 import DashboardClient from "@/app/dashboard/DashboardClient";
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 
 // Opt out of static caching so dashboard displays live database data.
@@ -25,7 +26,7 @@ interface ScanRow {
 }
 
 export default async function DashboardPage() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (!session) {
     redirect("/");
   }
