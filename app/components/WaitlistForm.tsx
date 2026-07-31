@@ -36,37 +36,16 @@ export default function WaitlistForm() {
     }
   };
 
-  if (status === "success") {
-    return (
-      <div
-        style={{
-          background: "rgba(16, 185, 129, 0.1)",
-          border: "1px solid rgba(16, 185, 129, 0.2)",
-          padding: "16px",
-          borderRadius: "10px",
-          color: "#10b981",
-          fontWeight: 600,
-          fontSize: "15px",
-          maxWidth: "480px",
-          margin: "0 auto",
-          textAlign: "center",
-        }}
-      >
-        🎉 You're on the list! We'll reach out soon.
-      </div>
-    );
-  }
-
   return (
     <div style={{ maxWidth: "480px", margin: "0 auto", textAlign: "left" }}>
-      <form onSubmit={handleSubmit} style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "12px" }}>
         <input
           type="email"
           required
           placeholder="Enter your work email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          disabled={status === "loading"}
+          disabled={status === "loading" || status === "success"}
           style={{
             flex: 1,
             minWidth: "240px",
@@ -82,28 +61,75 @@ export default function WaitlistForm() {
         />
         <button
           type="submit"
-          disabled={status === "loading"}
+          disabled={status === "loading" || status === "success"}
           style={{
             padding: "14px 24px",
-            background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+            background: status === "success" ? "#10b981" : "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
             border: "none",
             borderRadius: "10px",
             color: "#ffffff",
             fontWeight: 600,
             fontSize: "15px",
-            cursor: status === "loading" ? "not-allowed" : "pointer",
-            opacity: status === "loading" ? 0.7 : 1,
+            cursor: (status === "loading" || status === "success") ? "not-allowed" : "pointer",
+            opacity: (status === "loading" || status === "success") ? 0.7 : 1,
             boxShadow: "0 4px 12px rgba(6, 182, 212, 0.2)",
+            transition: "all 0.3s ease",
           }}
         >
-          {status === "loading" ? "Submitting..." : "Join Waitlist"}
+          {status === "loading" ? "Submitting..." : status === "success" ? "Joined!" : "Join Waitlist"}
         </button>
       </form>
-      {status === "error" && (
-        <p style={{ color: "#ef4444", fontSize: "14px", marginTop: "10px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-          <span>⚠️</span> {errorMessage}
-        </p>
-      )}
+      
+      {/* Message Area with reserved height and opacity transition */}
+      <div 
+        style={{ 
+          minHeight: "56px", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          transition: "opacity 0.4s ease",
+          opacity: status === "idle" || status === "loading" ? 0 : 1,
+        }}
+      >
+        {status === "success" && (
+          <div
+            style={{
+              background: "rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.2)",
+              padding: "12px 18px",
+              borderRadius: "10px",
+              color: "#10b981",
+              fontWeight: 600,
+              fontSize: "14px",
+              width: "100%",
+              textAlign: "center",
+            }}
+          >
+            🎉 You're on the list! We'll reach out soon.
+          </div>
+        )}
+        {status === "error" && (
+          <div
+            style={{
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(239, 68, 68, 0.2)",
+              padding: "12px 18px",
+              borderRadius: "10px",
+              color: "#ef4444",
+              fontWeight: 650,
+              fontSize: "14px",
+              width: "100%",
+              textAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px"
+            }}
+          >
+            <span>⚠️</span> {errorMessage}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

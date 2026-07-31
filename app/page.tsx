@@ -74,7 +74,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <main style={{ position: "relative", zIndex: 1, maxWidth: "1120px", margin: "0 auto", padding: "120px 24px 80px", textAlign: "center" }}>
+      <main style={{ position: "relative", zIndex: 1, maxWidth: "1120px", margin: "0 auto", padding: "100px 24px 80px", textAlign: "center" }}>
         <h1
           style={{
             fontSize: "clamp(44px, 7vw, 76px)",
@@ -103,9 +103,130 @@ export default function Home() {
         </p>
 
         {/* Waitlist form component */}
-        <div style={{ marginBottom: "40px" }}>
+        <div style={{ marginBottom: "48px" }}>
           <WaitlistForm />
         </div>
+
+        {/* Lightweight Code Diff Proof Section */}
+        <section style={{ maxWidth: "600px", margin: "0 auto 80px", textAlign: "left" }}>
+          <div
+            style={{
+              background: "#080b15",
+              border: "1px solid rgba(6, 182, 212, 0.15)",
+              borderRadius: "12px",
+              overflow: "hidden",
+              boxShadow: "0 12px 40px rgba(6, 182, 212, 0.05)",
+            }}
+          >
+            <div style={{ padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "#6b7280" }}>Real patch, real PR</span>
+              <a
+                href="https://github.com/Coder3257/ravi-dev/pull/4"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: "12px", color: "#06b6d4", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}
+              >
+                View PR #4
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+              </a>
+            </div>
+            <pre style={{ margin: 0, padding: "16px 20px", fontSize: "13px", fontFamily: "var(--font-geist-mono), monospace", lineHeight: "1.7", overflowX: "auto" }}>
+              <code style={{ display: "block", color: "#6b7280" }}>
+                <span>// stripe-client.ts</span>
+                {"\n"}
+                <span style={{ display: "block", background: "rgba(239, 68, 68, 0.1)", color: "#f87171", margin: "0 -20px", padding: "0 20px" }}>
+                  - const stripe = new Stripe(key, &#123; apiVersion: &apos;2023-10-16&apos; &#125;);
+                </span>
+                <span style={{ display: "block", background: "rgba(16, 185, 129, 0.1)", color: "#34d399", margin: "0 -20px", padding: "0 20px" }}>
+                  + const stripe = new Stripe(key, &#123;
+                </span>
+                <span style={{ display: "block", background: "rgba(16, 185, 129, 0.1)", color: "#34d399", margin: "0 -20px", padding: "0 20px" }}>
+                  +   apiVersion: &apos;2023-10-16&apos;,
+                </span>
+                <span style={{ display: "block", background: "rgba(16, 185, 129, 0.1)", color: "#34d399", margin: "0 -20px", padding: "0 20px" }}>
+                  +   typescript: true
+                </span>
+                <span style={{ display: "block", background: "rgba(16, 185, 129, 0.1)", color: "#34d399", margin: "0 -20px", padding: "0 20px" }}>
+                  + &#125;);
+                </span>
+              </code>
+            </pre>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section style={{ padding: "60px 0 80px", borderTop: "1px solid rgba(255, 255, 255, 0.05)" }}>
+          <h2 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "40px", color: "#ffffff" }}>
+            How It Works
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+            {[
+              {
+                step: "01",
+                title: "Detect",
+                desc: "Watches API changelogs continuously",
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#06b6d4" }}>
+                    <path d="M2 12h6M22 12h-6M12 2v6M12 22v-6M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0 -6 0"/>
+                  </svg>
+                )
+              },
+              {
+                step: "02",
+                title: "Patch",
+                desc: "AI writes the fix",
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#10b981" }}>
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                  </svg>
+                )
+              },
+              {
+                step: "03",
+                title: "Ship",
+                desc: "Opens a verified pull request",
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#8b5cf6" }}>
+                    <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v12"/>
+                  </svg>
+                )
+              }
+            ].map((card, i) => (
+              <div
+                key={i}
+                style={{
+                  background: "#0a0d16",
+                  border: "1px solid rgba(6, 182, 212, 0.15)",
+                  borderRadius: "16px",
+                  padding: "32px",
+                  textAlign: "center",
+                  boxShadow: "0 8px 30px rgba(6, 182, 212, 0.03), inset 0 0 16px rgba(6, 182, 212, 0.02)",
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "16px",
+                    padding: "1px",
+                    background: "linear-gradient(135deg, rgba(6, 182, 212, 0.3) 0%, rgba(16, 185, 129, 0) 100%)",
+                    WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                    WebkitMaskComposite: "xor",
+                    maskComposite: "exclude",
+                    pointerEvents: "none",
+                  }}
+                />
+                <div style={{ display: "flex", justifyContent: "center", gap: "10px", alignItems: "center", marginBottom: "16px" }}>
+                  {card.icon}
+                  <span style={{ fontSize: "13px", fontFamily: "var(--font-geist-mono), monospace", color: "#6b7280", fontWeight: 600 }}>{card.step}</span>
+                </div>
+                <h3 style={{ fontSize: "20px", fontWeight: 700, margin: "0 0 8px", color: "#ffffff", letterSpacing: "-0.01em" }}>{card.title}</h3>
+                <p style={{ color: "#9ca3af", fontSize: "14px", lineHeight: 1.5 }}>{card.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", marginBottom: "80px" }}>
           <Link
