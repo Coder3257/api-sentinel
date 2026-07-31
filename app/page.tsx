@@ -1,4 +1,5 @@
 import Link from "next/link";
+import WaitlistForm from "@/app/components/WaitlistForm";
 
 export default function Home() {
   return (
@@ -94,12 +95,17 @@ export default function Home() {
             fontSize: "clamp(17px, 2.2vw, 21px)",
             color: "#9ca3af",
             maxWidth: "640px",
-            margin: "0 auto 40px",
+            margin: "0 auto 32px",
             lineHeight: 1.6,
           }}
         >
           Continuous monitoring of OpenAPI changes. Automated compatibility scans. AI-generated patches delivered via verified pull requests.
         </p>
+
+        {/* Waitlist form component */}
+        <div style={{ marginBottom: "40px" }}>
+          <WaitlistForm />
+        </div>
 
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", marginBottom: "80px" }}>
           <Link
@@ -108,17 +114,17 @@ export default function Home() {
               display: "inline-flex",
               alignItems: "center",
               gap: "10px",
-              padding: "16px 32px",
-              fontSize: "16px",
+              padding: "14px 28px",
+              fontSize: "15px",
               fontWeight: 600,
               color: "#ffffff",
-              background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
               borderRadius: "10px",
-              boxShadow: "0 8px 28px rgba(6, 182, 212, 0.25)",
               transition: "all 0.2s",
             }}
           >
-            Open Dashboard
+            Open Live Feed Dashboard
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
           </Link>
         </div>
