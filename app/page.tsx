@@ -5,6 +5,7 @@ import Link from "next/link";
 import WaitlistForm from "@/app/components/WaitlistForm";
 import Reveal from "@/app/components/Reveal";
 import ThemeToggle from "@/app/components/ThemeToggle";
+import DemoWidget from "@/app/components/DemoWidget";
 
 export default function Home() {
   const [activeModal, setActiveModal] = useState<{ title: string; content: string } | null>(null);
@@ -148,54 +149,9 @@ export default function Home() {
           </section>
         </Reveal>
 
-        {/* Lightweight Code Diff Proof Section */}
+        {/* Interactive Live Demo Widget Section */}
         <Reveal>
-          <section style={{ maxWidth: "600px", margin: "0 auto 80px", textAlign: "left" }}>
-            <div
-              className="hover-card"
-              style={{
-                background: "var(--bg-elevated)",
-                border: "1px solid var(--border)",
-                borderRadius: "12px",
-                overflow: "hidden",
-                boxShadow: "var(--shadow-panel)",
-              }}
-            >
-              <div style={{ padding: "12px 18px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-muted)" }}>Real patch, real PR</span>
-                <a
-                  href="https://github.com/Coder3257/ravi-dev/pull/4"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontSize: "12px", color: "var(--accent)", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}
-                >
-                  View PR #4
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-                </a>
-              </div>
-              <pre style={{ margin: 0, padding: "16px 20px", fontSize: "13px", fontFamily: "var(--font-mono)", lineHeight: "1.7", overflowX: "auto" }}>
-                <code style={{ display: "block", color: "var(--text-muted)" }}>
-                  <span>// stripe-client.ts</span>
-                  {"\n"}
-                  <span style={{ display: "block", background: "var(--diff-del-bg)", color: "var(--diff-del-text)", margin: "0 -20px", padding: "0 20px" }}>
-                    - const stripe = new Stripe(key, &#123; apiVersion: &apos;2023-10-16&apos; &#125;);
-                  </span>
-                  <span style={{ display: "block", background: "var(--diff-add-bg)", color: "var(--diff-add-text)", margin: "0 -20px", padding: "0 20px" }}>
-                    + const stripe = new Stripe(key, &#123;
-                  </span>
-                  <span style={{ display: "block", background: "var(--diff-add-bg)", color: "var(--diff-add-text)", margin: "0 -20px", padding: "0 20px" }}>
-                    +   apiVersion: &apos;2023-10-16&apos;,
-                  </span>
-                  <span style={{ display: "block", background: "var(--diff-add-bg)", color: "var(--diff-add-text)", margin: "0 -20px", padding: "0 20px" }}>
-                    +   typescript: true
-                  </span>
-                  <span style={{ display: "block", background: "var(--diff-add-bg)", color: "var(--diff-add-text)", margin: "0 -20px", padding: "0 20px" }}>
-                    + &#125;);
-                  </span>
-                </code>
-              </pre>
-            </div>
-          </section>
+          <DemoWidget />
         </Reveal>
 
         {/* How It Works Section */}
@@ -224,7 +180,8 @@ export default function Home() {
                   detail: "The system feeds the OpenAPI diff and the affected call sites in your code into a fine-tuned Gemini model to generate precise compatibility patches.",
                   icon: (
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--accent)" }}>
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                      <polyline points="16 18 22 12 16 6"/>
+                      <polyline points="8 6 2 12 8 18"/>
                     </svg>
                   )
                 },
@@ -235,7 +192,10 @@ export default function Home() {
                   detail: "We push the code patch to a branch, run tests via the GitHub Checks API, and open a PR only after verifying your test suite is green.",
                   icon: (
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--accent)" }}>
-                      <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v12"/>
+                      <circle cx="18" cy="18" r="3"/>
+                      <circle cx="6" cy="6" r="3"/>
+                      <path d="M13 6h3a2 2 0 0 1 2 2v7"/>
+                      <path d="M6 9v12"/>
                     </svg>
                   )
                 }
