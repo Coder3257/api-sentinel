@@ -5,6 +5,7 @@ import Link from "next/link";
 import ThemeToggle from "@/app/components/ThemeToggle";
 
 interface Repo {
+  id: string;
   owner: string;
   name: string;
 }
@@ -33,6 +34,33 @@ interface DashboardClientProps {
 export default function DashboardClient({ totalRepos, totalScans, totalPRs, scans, userRepos }: DashboardClientProps) {
   const [activeModal, setActiveModal] = useState<{ title: string; content: string } | null>(null);
   const [expandedScan, setExpandedScan] = useState<string | null>(null);
+  const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
+
+  const handleDisconnect = async (repoId: string, repoName: string) => {
+    if (!window.confirm(`Are you sure you want to disconnect ${repoName}? This will unlink the repository but preserve its scan and pull request history.`)) {
+      return;
+    }
+
+    setDisconnectingId(repoId);
+    try {
+      const res = await fetch("/api/repos/disconnect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ repoId }),
+      });
+
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to disconnect repository.");
+      }
+    } catch (err) {
+      alert("Connection error. Please try again.");
+    } finally {
+      setDisconnectingId(null);
+    }
+  };
 
   const getStatusDetails = (status: string) => {
     switch (status.toLowerCase()) {
@@ -160,50 +188,82 @@ export default function DashboardClient({ totalRepos, totalScans, totalPRs, scan
           <>
             <div
               style={{
-                background: "var(--bg-elevated)",
-                border: "1px solid var(--border)",
-                borderRadius: "16px",
-                padding: "16px 24px",
                 marginBottom: "32px",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-                gap: "12px",
+                flexDirection: "column",
+                gap: "16px",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text)" }}>Connected Repositories:</span>
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  {userRepos.map((repo, idx) => (
-                    <span
-                      key={idx}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text)", margin: 0 }}>
+                  Connected Repositories
+                </h2>
+                <Link
+                  href="/connect"
+                  className="btn-hover"
+                  style={{
+                    padding: "8px 16px",
+                    background: "var(--bg-elevated)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                    fontWeight: 600,
+                    fontSize: "13px",
+                    color: "var(--text)",
+                    textDecoration: "none",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  + Connect Another Repository
+                </Link>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+                {userRepos.map((repo) => (
+                  <div
+                    key={repo.id}
+                    className="hover-card"
+                    style={{
+                      background: "var(--bg-elevated)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "12px",
+                      padding: "20px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "16px",
+                      boxShadow: "var(--shadow-panel)",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                      </svg>
+                      <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text)", fontFamily: "var(--font-mono)" }}>
+                        {repo.owner}/{repo.name}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => handleDisconnect(repo.id, `${repo.owner}/${repo.name}`)}
+                      disabled={disconnectingId === repo.id}
+                      className="btn-hover"
                       style={{
-                        fontSize: "12px",
-                        background: "var(--bg-inset)",
-                        border: "1px solid var(--border)",
-                        padding: "4px 10px",
+                        padding: "6px 12px",
+                        background: "rgba(239, 68, 68, 0.1)",
+                        border: "1px solid rgba(239, 68, 68, 0.2)",
                         borderRadius: "6px",
-                        color: "var(--text-secondary)",
-                        fontFamily: "var(--font-mono)",
+                        color: "#ef4444",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        transition: "all 0.2s",
                       }}
                     >
-                      {repo.owner}/{repo.name}
-                    </span>
-                  ))}
-                </div>
+                      {disconnectingId === repo.id ? "Disconnecting..." : "Disconnect"}
+                    </button>
+                  </div>
+                ))}
               </div>
-              <Link
-                href="/connect"
-                style={{
-                  fontSize: "13px",
-                  color: "var(--accent)",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                }}
-              >
-                Manage Repositories &rarr;
-              </Link>
             </div>
 
             {totalScans === 0 ? (

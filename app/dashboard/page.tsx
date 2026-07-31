@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 export const revalidate = 0;
 
 interface Repo {
+  id: string;
   owner: string;
   name: string;
 }
@@ -46,6 +47,7 @@ export default async function DashboardPage() {
         status,
         created_at,
         repos (
+          id,
           owner,
           name
         ),
@@ -58,7 +60,7 @@ export default async function DashboardPage() {
       .limit(10),
     supabase
       .from("repos")
-      .select("owner, name")
+      .select("id, owner, name")
       .eq("user_id", userId)
   ]);
 
