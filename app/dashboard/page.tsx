@@ -83,8 +83,12 @@ export default async function DashboardPage() {
               <span style={{ width: "16px", height: "16px", borderRadius: "5px", background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)", boxShadow: "0 0 10px rgba(6, 182, 212, 0.5)" }} />
               <Link href="/" style={{ fontSize: "14px", fontWeight: 600, color: "#9ca3af", textDecoration: "none" }}>API Sentinel</Link>
             </div>
-            <h1 style={{ fontSize: "32px", fontWeight: 800, letterSpacing: "-0.03em", color: "#ffffff", margin: 0 }}>
+            <h1 style={{ fontSize: "32px", fontWeight: 800, letterSpacing: "-0.03em", color: "#ffffff", margin: 0, display: "flex", alignItems: "center", gap: "12px" }}>
               Live Activity Feed
+              <span style={{ display: "inline-flex", position: "relative", width: "10px", height: "10px" }}>
+                <span className="live-pulse" style={{ position: "absolute", inlineSize: "100%", blockSize: "100%", borderRadius: "50%", background: "#10b981", opacity: 0.75 }}></span>
+                <span style={{ position: "relative", display: "inline-flex", borderRadius: "50%", width: "10px", height: "10px", background: "#10b981" }}></span>
+              </span>
             </h1>
             <p style={{ color: "#6b7280", fontSize: "14px", margin: "4px 0 0" }}>
               Real-time compatibility scanning and patching status
@@ -110,9 +114,9 @@ export default async function DashboardPage() {
         {/* Stats Grid */}
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", marginBottom: "48px" }}>
           {[
-            { value: totalRepos, label: "Repos Monitored" },
-            { value: totalScans, label: "Scans Run" },
-            { value: totalPRs, label: "Pull Requests Opened" },
+            { value: totalRepos, label: "Repos Monitored", subtext: "in active beta" },
+            { value: totalScans, label: "Scans Run", subtext: "continuous verification" },
+            { value: totalPRs, label: "Pull Requests Opened", subtext: "automated compatibility fixes" },
           ].map((stat, i) => (
             <div
               key={i}
@@ -153,9 +157,11 @@ export default async function DashboardPage() {
                 {stat.value}
               </div>
               <div style={{ color: "#6b7280", fontSize: "14px", fontWeight: 550, letterSpacing: "0.01em" }}>{stat.label}</div>
+              <div style={{ color: "#4b5563", fontSize: "11px", marginTop: "4px", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>{stat.subtext}</div>
             </div>
           ))}
         </section>
+
 
         {/* Activity Feed Section */}
         <section>
