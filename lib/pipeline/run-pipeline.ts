@@ -49,6 +49,7 @@ interface RepoRow {
   name: string;
   installation_id: number;
   default_branch: string;
+  user_id?: string | null;
 }
 
 /** Terminal (or in-flight) state recorded for one repo × entry pairing. */
@@ -286,6 +287,23 @@ async function processRepoForEntry(
       })),
     });
 
+    if (repo.user_id) {
+      try {
+        const { data: userData } = await supabase
+          .from("users")
+          .select("email")
+          .eq("id", repo.user_id)
+          .maybeSingle();
+
+        if (userData?.email) {
+          const { sendPrOpenedEmail } = await import("@/lib/email/notify");
+          await sendPrOpenedEmail(userData.email, repoLabel, pr.prUrl);
+        }
+      } catch (emailErr) {
+        console.error(`[pipeline] Failed to send email alert for ${repoLabel}:`, emailErr);
+      }
+    }
+
     return {
       ...base,
       outcome: "pr_opened",
@@ -355,7 +373,7 @@ export async function runPipeline(
   // ── Step 2: load installed repos ────────────────────────────────────────────
   const { data: repos, error: reposErr } = await supabase
     .from("repos")
-    .select("id, github_repo_id, owner, name, installation_id, default_branch");
+    .select("id, github_repo_id, owner, name, installation_id, default_branch, user_id");
 
   if (reposErr) {
     throw new Error(`Failed to load repos: ${reposErr.message}`);
