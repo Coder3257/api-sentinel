@@ -22,8 +22,8 @@ import type { SpecChange } from "@/lib/stripe/changelog";
 // ---------------------------------------------------------------------------
 
 export interface PatchInput {
-  /** The breaking changes detected by diffSpecs(). */
-  changes: SpecChange[];
+  /** The breaking changes detected by diffSpecs(). Optional for generic. */
+  changes?: SpecChange[];
   /** Human-readable one-line summary of the overall change set. */
   changesSummary: string;
   /** The file to patch. */
@@ -31,6 +31,17 @@ export interface PatchInput {
     path: string;
     content: string;
   };
+  /** Call sites to target. Optional. */
+  callSites?: {
+    methodPath: string;
+    lineNumber: number;
+    snippet: string;
+    changeDescription: string;
+  }[];
+  /** Release notes for generic package upgrade. */
+  releaseNotes?: string;
+  /** Package name for generic package upgrade. */
+  packageName?: string;
 }
 
 export interface PatchResult {
@@ -42,6 +53,11 @@ export interface PatchResult {
   reasoning: string;
   /** True if patchedContent differs from originalContent. */
   changed: boolean;
+  /** Targeted call sites. */
+  callSites?: {
+    methodPath: string;
+    lineNumber: number;
+  }[];
 }
 
 // ---------------------------------------------------------------------------
@@ -67,25 +83,50 @@ const patchResponseSchema: Schema = {
 // Prompt Builders
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `You are an expert TypeScript developer specialising in Stripe SDK migrations.
+function getSystemPrompt(packageName?: string): string {
+  const name = packageName || "Stripe SDK";
+  return `You are an expert TypeScript developer specialising in ${name} migrations.
 
 Your job is to update a TypeScript/JavaScript source file so it is compatible
-with a Stripe API breaking change. Follow these rules strictly:
+with a major version upgrade of ${name}. Follow these rules strictly:
 
 1. Make the MINIMUM change required — do not refactor unrelated code.
 2. Preserve all existing comments, formatting, and logic that is unaffected.
-3. If no change is needed (the file is already compatible), return the original file content unchanged.`;
+3. Focus your edits directly on the affected code sections and keep surrounding code intact.
+4. If no change is needed (the file is already compatible), return the original file content unchanged.`;
+}
 
 function buildUserPrompt(input: PatchInput): string {
-  const changeList = input.changes
-    .map((c) => `  • [${c.type}] ${c.location}\n    ${c.description}`)
-    .join("\n");
+  const name = input.packageName || "Stripe";
+  let changeList = "";
+  if (input.changes) {
+    changeList = input.changes
+      .map((c) => `  • [${c.type}] ${c.location}\n    ${c.description}`)
+      .join("\n");
+  } else if (input.releaseNotes) {
+    changeList = input.releaseNotes;
+  }
 
-  return `## Stripe API Breaking Change
+  let callSitesSection = "";
+  if (input.callSites && input.callSites.length > 0) {
+    callSitesSection = `### Targeted Call Sites to Fix\n` + input.callSites.map((cs) => {
+      return `- **Call Site**: \`${cs.methodPath}\` (Line ${cs.lineNumber})
+  **Code Snippet**:
+  \`\`\`typescript
+${cs.snippet}
+  \`\`\`
+  **Required Spec Change**: ${cs.changeDescription}
+`;
+    }).join("\n");
+  }
+
+  return `## ${name} API Upgrade
 ${input.changesSummary}
 
-### Detailed changes
+### Detailed changes / Release Notes
 ${changeList}
+
+${callSitesSection}
 
 ## File to update
 Path: ${input.file.path}
@@ -94,7 +135,7 @@ Path: ${input.file.path}
 ${input.file.content}
 \`\`\`
 
-Return the updated file content and reasoning matching the JSON schema.`;
+Return the updated file content and reasoning matching the JSON schema. Remember to focus your changes precisely on the targeted code and preserve all other parts of the file unchanged.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -141,7 +182,7 @@ export async function generatePatch(input: PatchInput): Promise<PatchResult> {
         responseSchema: patchResponseSchema,
         temperature: 0.1, // low temperature for deterministic code editing
       },
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction: getSystemPrompt(input.packageName),
     });
 
     const response = await model.generateContent(buildUserPrompt(input));

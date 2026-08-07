@@ -95,7 +95,7 @@ function ConnectContent() {
                 background: "var(--gradient-brand)",
                 border: "none",
                 borderRadius: "10px",
-                color: "#ffffff",
+                color: "var(--accent-contrast)",
                 fontWeight: 600,
                 fontSize: "15px",
                 textDecoration: "none",
@@ -124,8 +124,8 @@ function ConnectContent() {
 
         {status === "success" && (
           <div>
-            <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(16, 185, 129, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--additive-bg)", color: "var(--additive)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
@@ -143,7 +143,7 @@ function ConnectContent() {
                 padding: "12px 24px",
                 background: "var(--gradient-brand)",
                 borderRadius: "10px",
-                color: "#ffffff",
+                color: "var(--accent-contrast)",
                 fontWeight: 600,
                 fontSize: "14px",
                 textDecoration: "none",
@@ -157,8 +157,8 @@ function ConnectContent() {
 
         {status === "error" && (
           <div>
-            <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--breaking-bg)", color: "var(--breaking)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
             </div>
@@ -215,7 +215,7 @@ export default function ConnectPage() {
       {/* Background decoration */}
       <div style={{ position: "absolute", top: "-10%", left: "50%", transform: "translateX(-50%)", width: "70vw", height: "70vw", maxWidth: "800px", maxHeight: "800px", background: "var(--gradient-hero)", borderRadius: "50%", filter: "blur(80px)", pointerEvents: "none", zIndex: 0 }} />
 
-      <header style={{ position: "sticky", top: 0, zIndex: 50, backdropFilter: "blur(12px)", background: "rgba(var(--bg), 0.8)", borderBottom: "1px solid var(--border)", padding: "16px 24px" }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 50, backdropFilter: "blur(12px)", background: "var(--glass)", borderBottom: "1px solid var(--border)", padding: "16px 24px" }}>
         <div style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", fontWeight: 700, fontSize: "18px", letterSpacing: "-0.02em" }}>
             <span style={{ width: "20px", height: "20px", borderRadius: "6px", background: "var(--gradient-brand)", boxShadow: "0 0 12px var(--accent-glow)" }} />

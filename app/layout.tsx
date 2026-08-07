@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Figtree } from "next/font/google";
 import "./globals.css";
 import Providers from "@/app/components/Providers";
 
@@ -13,21 +13,41 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Display face for headings — referenced by --font-display in globals.css.
+const figtree = Figtree({
+  variable: "--font-figtree",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
+// Prefer an explicit site URL; fall back to the Vercel-provided host, then local.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
 export const metadata: Metadata = {
   title: "API Sentinel — Ship through Stripe API changes",
   description:
-    "API Sentinel watches the Stripe OpenAPI spec, detects breaking, deprecation and additive changes, and opens verified GitHub PRs that fix your code before your build breaks.",
-  metadataBase: new URL("https://apisentinel.dev"),
+    "API Sentinel watches the Stripe OpenAPI spec, detects breaking, deprecation and additive changes, and opens draft PRs with AI-generated, build-tested patches for human review before merge.",
+  metadataBase: new URL(siteUrl),
   openGraph: {
     title: "API Sentinel — Ship through Stripe API changes",
     description:
-      "Auto-fix breaking Stripe API changes before they break your build. Detect, patch, and open a verified PR — automatically.",
+      "Auto-fix breaking Stripe API changes before they break your build. AI-generated patch, build-tested, opened as draft PR for human review before merge.",
     type: "website",
+    url: siteUrl,
+    siteName: "API Sentinel",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "API Sentinel — Ship through Stripe API changes",
+    description:
+      "Auto-fix breaking Stripe API changes before they break your build. AI-generated patch, build-tested, opened as draft PR for human review before merge.",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07060d",
+  themeColor: "#060707",
 };
 
 // Runs before paint to set the theme class and avoid a flash of the wrong theme.
@@ -49,7 +69,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${figtree.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
       </head>

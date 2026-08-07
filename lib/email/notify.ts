@@ -13,6 +13,38 @@ export async function sendPrOpenedEmail(
       return;
     }
 
+    // Parse owner/name from repoName
+    const [owner, name] = repoName.split("/");
+    if (owner && name) {
+      const { getSupabaseClient } = await import("@/lib/supabase/client");
+      const supabase = getSupabaseClient();
+      
+      const { data: repo } = await supabase
+        .from("repos")
+        .select("id, user_id")
+        .eq("owner", owner)
+        .eq("name", name)
+        .maybeSingle();
+
+      if (repo && repo.user_id) {
+        const { data: prefs } = await supabase
+          .from("notification_prefs")
+          .select("repo_id, email_enabled")
+          .eq("user_id", repo.user_id);
+
+        const override = prefs?.find((p) => p.repo_id === repo.id);
+        const globalPref = prefs?.find((p) => p.repo_id === null);
+
+        const emailEnabled = override ? override.email_enabled : (globalPref ? globalPref.email_enabled : true);
+
+        if (!emailEnabled) {
+          console.log(`[EMAIL] Notifications disabled for repo ${repoName}. Skipping email dispatch.`);
+          return;
+        }
+      }
+    }
+
+
     const fromAddress = process.env.RESEND_FROM_EMAIL || "API Sentinel <onboarding@resend.dev>";
 
     const { data, error } = await resend.emails.send({

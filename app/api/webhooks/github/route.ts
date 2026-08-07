@@ -197,6 +197,69 @@ export async function POST(request: Request): Promise<Response> {
         await deleteReposByGithubId(ids);
       }
 
+    } else if (event === "pull_request") {
+      // Handle pull_request event (closed action)
+      if (payload.action === "closed") {
+        const prPayload = (payload as any).pull_request;
+        const repoPayload = (payload as any).repository;
+        if (prPayload && repoPayload) {
+          const prNumber = prPayload.number;
+          const merged = !!prPayload.merged;
+          const githubRepoId = repoPayload.id;
+          const githubPrId = prPayload.id;
+
+          console.log(`[webhook] PR #${prNumber} closed. merged=${merged}, github_repo_id=${githubRepoId}, github_pr_id=${githubPrId}`);
+
+          const supabase = getSupabaseClient();
+          
+          // Locate the pull request using github_pr_id first, falling back to pr_url matching
+          let query = supabase.from("pull_requests").select("id, status");
+          if (githubPrId) {
+            query = query.eq("github_pr_id", githubPrId);
+          } else {
+            // Fallback: match by URL suffix "/pull/<number>" on scans belonging to the repo
+            console.log(`[webhook] github_pr_id missing, using fallback resolution for repo ${githubRepoId} and PR #${prNumber}`);
+            // Find repos matching this repo id
+            const { data: repos } = await supabase.from("repos").select("id").eq("github_repo_id", githubRepoId);
+            if (repos && repos.length > 0) {
+              const repoIds = repos.map((r) => r.id);
+              // Find scans for these repos
+              const { data: scans } = await supabase.from("scans").select("id").in("repo_id", repoIds);
+              if (scans && scans.length > 0) {
+                const scanIds = scans.map((s) => s.id);
+                query = query.in("scan_id", scanIds).like("pr_url", `%/pull/${prNumber}`);
+              }
+            }
+          }
+
+          const { data: matchingPrs, error: fetchError } = await query;
+          if (fetchError) {
+            console.error(`[webhook] Error fetching matching PR: ${fetchError.message}`);
+          } else if (matchingPrs && matchingPrs.length > 0) {
+            const prRow = matchingPrs[0];
+            const updatePayload: any = {
+              status: merged ? "merged" : "closed"
+            };
+            if (merged) {
+              updatePayload.merged = true;
+              updatePayload.merged_at = new Date().toISOString();
+            }
+            const { error: updateError } = await supabase
+              .from("pull_requests")
+              .update(updatePayload)
+              .eq("id", prRow.id);
+            
+            if (updateError) {
+              console.error(`[webhook] Failed to update PR row: ${updateError.message}`);
+            } else {
+              console.log(`[webhook] Successfully updated PR row ${prRow.id} to status=${updatePayload.status}`);
+            }
+          } else {
+            console.warn(`[webhook] No matching pull request row found in database for github_pr_id=${githubPrId} or PR #${prNumber}`);
+          }
+        }
+      }
+
     } else if (event === "push") {
       // Piece 8 will wire push → re-scan. Logged only for now.
       const branch = payload.ref?.replace("refs/heads/", "") ?? "unknown";

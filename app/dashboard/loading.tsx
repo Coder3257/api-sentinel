@@ -1,6 +1,6 @@
 export default function DashboardLoading() {
   return (
-    <div style={{ background: "#060913", color: "#f3f4f6", minHeight: "100vh", fontFamily: "var(--font-geist-sans), system-ui, -apple-system, sans-serif", padding: "40px 24px" }}>
+    <div style={{ background: "var(--bg)", color: "var(--text-secondary)", minHeight: "100vh", fontFamily: "var(--font-geist-sans), system-ui, -apple-system, sans-serif", padding: "40px 24px" }}>
       <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
         {/* Header Skeleton */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px" }}>
@@ -16,7 +16,7 @@ export default function DashboardLoading() {
             <div
               key={i}
               style={{
-                background: "#0a0d16",
+                background: "var(--bg-elevated)",
                 border: "1px solid rgba(6, 182, 212, 0.1)",
                 borderRadius: "16px",
                 padding: "32px",
@@ -38,7 +38,7 @@ export default function DashboardLoading() {
             <div
               key={i}
               style={{
-                background: "#0a0d16",
+                background: "var(--bg-elevated)",
                 border: "1px solid rgba(255, 255, 255, 0.05)",
                 borderRadius: "16px",
                 padding: "24px",

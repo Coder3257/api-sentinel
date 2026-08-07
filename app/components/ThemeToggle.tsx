@@ -31,7 +31,7 @@ export default function ThemeToggle() {
     }
     // keep browser chrome in sync
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", next === "dark" ? "#07060d" : "#ffffff");
+    if (meta) meta.setAttribute("content", next === "dark" ? "#060707" : "#ffffff");
     setTheme(next);
   }
 

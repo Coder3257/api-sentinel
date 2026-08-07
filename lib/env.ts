@@ -13,21 +13,37 @@
  * are present WITHOUT ever returning their values.
  */
 
-/** Server-only required vars — the pipeline cannot run without these. */
+/** Server-only required vars — the app cannot run correctly without these. */
 const REQUIRED_SERVER_VARS = [
+  // Pipeline: read repos, commit patches, open PRs
   "GITHUB_APP_ID",
   "GITHUB_APP_PRIVATE_KEY",
   "GITHUB_WEBHOOK_SECRET",
+  // Persistence
   "NEXT_PUBLIC_SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
+  // Patch generation
   "GOOGLE_AI_API_KEY",
+  // Cron auth (route fails closed without it)
   "CRON_SECRET",
+  // Sign-in (NextAuth + GitHub OAuth app — distinct from the GitHub App above)
+  "GITHUB_CLIENT_ID",
+  "GITHUB_CLIENT_SECRET",
+  "NEXTAUTH_SECRET",
 ] as const;
 
-/** Optional vars — have sane defaults or are only needed for onboarding UX. */
+/** Optional vars — have sane defaults or only affect a non-core feature. */
 const OPTIONAL_VARS = [
+  // Onboarding UX: builds the "Install on GitHub" URL
   "NEXT_PUBLIC_GITHUB_APP_SLUG",
+  // Canonical URL for metadata/sitemap (falls back to VERCEL_URL)
+  "NEXT_PUBLIC_SITE_URL",
+  // NextAuth infers this from the request on Vercel; set it for custom domains
+  "NEXTAUTH_URL",
   "GOOGLE_AI_MODEL",
+  // Email notifications degrade gracefully when unset
+  "RESEND_API_KEY",
+  "RESEND_FROM_EMAIL",
   "STRIPE_OPENAPI_REPO_OWNER",
   "STRIPE_OPENAPI_REPO_NAME",
   "STRIPE_OPENAPI_SPEC_PATH",

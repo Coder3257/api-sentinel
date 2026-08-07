@@ -1,407 +1,371 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import WaitlistForm from "@/app/components/WaitlistForm";
 import Reveal from "@/app/components/Reveal";
 import ThemeToggle from "@/app/components/ThemeToggle";
 import DemoWidget from "@/app/components/DemoWidget";
+import SpecTimeline from "@/app/components/SpecTimeline";
+import styles from "./page.module.css";
 
 export default function Home() {
   const [activeModal, setActiveModal] = useState<{ title: string; content: string } | null>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { data: session, status } = useSession();
 
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  // Escape closes the detail modal.
+  useEffect(() => {
+    if (!activeModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setActiveModal(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeModal]);
+
   return (
-    <div style={{ background: "var(--bg)", color: "var(--text)", minHeight: "100vh", fontFamily: "var(--font-sans)", position: "relative", overflow: "hidden" }}>
-      
-      {/* Floating Ambient Orbs */}
-      <div className="float-orb-1" style={{
-        position: "absolute",
-        top: "15%",
-        left: "10%",
-        width: "250px",
-        height: "250px",
-        background: "radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(0,0,0,0) 70%)",
-        borderRadius: "50%",
-        filter: "blur(60px)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
-      <div className="float-orb-2" style={{
-        position: "absolute",
-        top: "45%",
-        right: "15%",
-        width: "300px",
-        height: "300px",
-        background: "radial-gradient(circle, rgba(192, 132, 252, 0.1) 0%, rgba(0,0,0,0) 70%)",
-        borderRadius: "50%",
-        filter: "blur(80px)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
-      <div className="float-orb-1" style={{
-        position: "absolute",
-        top: "70%",
-        left: "25%",
-        width: "200px",
-        height: "200px",
-        background: "radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, rgba(0,0,0,0) 70%)",
-        borderRadius: "50%",
-        filter: "blur(50px)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
+    <div className={styles.void}>
+      {/* Fixed-position chrome lives outside .shell so the shell's clipping
+          can never affect it. */}
+      <div className={styles.scrollProgress} style={{ width: `${scrollProgress}%` }} />
 
-      {/* Main Glowing Background Accents */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-20%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "70vw",
-          height: "70vw",
-          maxWidth: "800px",
-          maxHeight: "800px",
-          background: "var(--gradient-hero)",
-          borderRadius: "50%",
-          pointerEvents: "none",
-          filter: "blur(80px)",
-          zIndex: 0,
-        }}
-      />
+      <div className={styles.shell}>
+        {/* Glass pill nav */}
+        <div className={styles.navRow}>
+          <div className={styles.navPill}>
+            <Link href="/" className={styles.brand}>
+              <span className={styles.brandMark} />
+              <span className={styles.brandName}>API Sentinel</span>
+            </Link>
 
-      {/* Navigation */}
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
-          backdropFilter: "blur(12px)",
-          background: "rgba(var(--bg), 0.8)",
-          borderBottom: "1px solid var(--border)",
-          padding: "16px 24px",
-        }}
-      >
-        <div style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontWeight: 700, fontSize: "18px", letterSpacing: "-0.02em" }}>
-            <span style={{ width: "20px", height: "20px", borderRadius: "6px", background: "var(--gradient-brand)", boxShadow: "0 0 12px var(--accent-glow)" }} />
-            <span>API Sentinel</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <ThemeToggle />
-            {status === "authenticated" ? (
-              <>
-                <span style={{ fontSize: "14px", color: "var(--text-secondary)", fontWeight: 555 }}>
-                  {session.user?.name || "User"}
-                </span>
-                <Link
-                  href="/dashboard"
-                  className="btn-hover"
-                  style={{
-                    padding: "10px 20px",
-                    background: "var(--bg-elevated)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    fontWeight: 600,
-                    fontSize: "14px",
-                    color: "var(--text)",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  Dashboard
-                </Link>
-                <button
-                  onClick={() => signOut()}
-                  className="btn-hover"
-                  style={{
-                    padding: "10px 20px",
-                    background: "none",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    fontWeight: 600,
-                    fontSize: "14px",
-                    color: "var(--text-muted)",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  Sign Out
+            <nav className={styles.navLinks}>
+              <a href="#how">How It Works</a>
+              <a href="#features">Features</a>
+              <Link href="/pricing">Pricing</Link>
+            </nav>
+
+            <div className={styles.navSpacer} />
+
+            <div className={styles.navActions}>
+              <ThemeToggle />
+              {status === "authenticated" ? (
+                <>
+                  <span className={styles.navUser}>{session.user?.name || "User"}</span>
+                  <Link href="/dashboard" className={styles.btnGhost}>
+                    Dashboard
+                  </Link>
+                  <button onClick={() => signOut()} className={styles.btnGhost}>
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => signIn("github")} className={styles.btnPrimary}>
+                  Sign In
                 </button>
-              </>
-            ) : (
-              <button
-                onClick={() => signIn("github")}
-                className="btn-hover"
-                style={{
-                  padding: "10px 20px",
-                  background: "var(--gradient-brand)",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontWeight: 600,
-                  fontSize: "14px",
-                  color: "#ffffff",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 12px var(--accent-glow)",
-                  transition: "all 0.2s",
-                }}
-              >
-                Sign In
-              </button>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </header>
 
+        {/* Hero */}
+        <section className={styles.hero}>
+          <Reveal>
+            <a href="#" className={styles.eyebrow}>
+              <i className={styles.eyebrowDot} />
+              Live monitoring for Stripe OpenAPI
+            </a>
+          </Reveal>
 
-      {/* Main Container */}
-      <main style={{ position: "relative", zIndex: 1, maxWidth: "1120px", margin: "0 auto", padding: "100px 24px 80px", textAlign: "center" }}>
-        
-        {/* Hero & Waitlist Section */}
-        <Reveal>
-          <section style={{ textAlign: "center", marginBottom: "80px" }}>
-            <h1
-              style={{
-                fontSize: "clamp(44px, 7vw, 76px)",
-                fontWeight: 800,
-                letterSpacing: "-0.04em",
-                lineHeight: 1.05,
-                marginBottom: "24px",
-                color: "var(--text)",
-              }}
-            >
-              Your API dependencies<br />
-              <span style={{ background: "var(--gradient-brand)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                patch themselves.
-              </span>
+          <Reveal>
+            <h1 className={styles.heroTitle}>
+              Your API dependencies <span className={styles.heroTitleDim}>patch themselves.</span>
             </h1>
-            <p
-              style={{
-                fontSize: "clamp(17px, 2.2vw, 21px)",
-                color: "var(--text-secondary)",
-                maxWidth: "640px",
-                margin: "0 auto 32px",
-                lineHeight: 1.6,
-              }}
-            >
-              Continuous monitoring of OpenAPI changes. Automated compatibility scans. AI-generated patches delivered via verified pull requests.
-            </p>
+          </Reveal>
 
-            {/* Waitlist form component */}
-            <div style={{ marginBottom: "48px" }}>
-              <WaitlistForm />
+          <Reveal>
+            <p className={styles.heroSub}>
+              Continuous monitoring of OpenAPI changes. Automated compatibility scans.
+              AI-generated patch, build-tested, opened as draft PR for human review before merge.
+            </p>
+          </Reveal>
+
+          <Reveal>
+            <div className={styles.heroCtas}>
+              {status === "authenticated" ? (
+                <Link href="/connect" className={styles.btnPrimaryLg}>
+                  Get Started
+                </Link>
+              ) : (
+                <button onClick={() => signIn("github")} className={styles.btnPrimaryLg}>
+                  Get Started
+                </button>
+              )}
+              <Link href="/dashboard" className={styles.btnGhostLg}>
+                View Dashboard
+              </Link>
+            </div>
+          </Reveal>
+
+          <Reveal>
+            <p className={styles.heroFoot}>No credit card required</p>
+          </Reveal>
+
+          {/* Aurora stage with timeline */}
+          <Reveal>
+            <div className={styles.heroStage}>
+              <div className={styles.heroStageInner}>
+                <DemoWidget />
+                <SpecTimeline />
+              </div>
+            </div>
+          </Reveal>
+        </section>
+
+        {/* Trust */}
+        <Reveal>
+          <section className={styles.trust}>
+            <p>Powered by real spec diffs</p>
+            <div className={styles.trustLogos}>
+              <span>Stripe</span>
+              <span>OpenAPI</span>
+              <span>GitHub Checks</span>
             </div>
           </section>
         </Reveal>
 
-        {/* Interactive Live Demo Widget Section */}
+        {/* How It Works */}
         <Reveal>
-          <DemoWidget />
-        </Reveal>
+          <section className={styles.section} id="how">
+            <div className={styles.sectionHead}>
+              <p className={styles.kicker}>Process</p>
+              <h2 className={styles.sectionTitle}>How It Works</h2>
+              <p className={styles.sectionSub}>
+                Three stages, fully automated. From spec change to green PR.
+              </p>
+            </div>
 
-        {/* How It Works Section */}
-        <Reveal>
-          <section style={{ padding: "60px 0 80px", borderTop: "1px solid var(--border)" }}>
-            <h2 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "40px", color: "var(--text)" }}>
-              How It Works
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+            <ol className={styles.steps}>
               {[
                 {
-                  step: "01",
+                  num: "01",
                   title: "Detect",
                   desc: "Watches API changelogs continuously",
                   detail: "We poll Stripe OpenAPI repositories and diff new commits/tags to classify changes as breaking, deprecation, or additive.",
                   icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--accent)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M2 12h6M22 12h-6M12 2v6M12 22v-6M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0 -6 0"/>
                     </svg>
-                  )
+                  ),
                 },
                 {
-                  step: "02",
+                  num: "02",
                   title: "Patch",
                   desc: "AI writes the fix",
-                  detail: "The system feeds the OpenAPI diff and the affected call sites in your code into a fine-tuned Gemini model to generate precise compatibility patches.",
+                  detail: "The system feeds the OpenAPI diff and affected call sites in your code into a fine-tuned Gemini model to generate precise compatibility patches.",
                   icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--accent)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="16 18 22 12 16 6"/>
                       <polyline points="8 6 2 12 8 18"/>
                     </svg>
-                  )
+                  ),
                 },
                 {
-                  step: "03",
+                  num: "03",
                   title: "Ship",
-                  desc: "Opens a verified pull request",
+                  desc: "AI-generated patch, build-tested, opened as draft PR for human review before merge.",
                   detail: "We push the code patch to a branch, run tests via the GitHub Checks API, and open a PR only after verifying your test suite is green.",
                   icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--accent)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="18" cy="18" r="3"/>
                       <circle cx="6" cy="6" r="3"/>
                       <path d="M13 6h3a2 2 0 0 1 2 2v7"/>
                       <path d="M6 9v12"/>
                     </svg>
-                  )
-                }
+                  ),
+                },
               ].map((card, i) => (
-                <div
-                  key={i}
-                  className="hover-card"
-                  onClick={() => setActiveModal({ title: card.title, content: card.detail })}
-                  style={{
-                    background: "var(--bg-elevated)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "16px",
-                    padding: "32px",
-                    textAlign: "center",
-                    boxShadow: "var(--shadow-panel)",
-                    position: "relative",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "center", gap: "10px", alignItems: "center", marginBottom: "16px" }}>
-                    {card.icon}
-                    <span style={{ fontSize: "13px", fontFamily: "var(--font-mono)", color: "var(--text-muted)", fontWeight: 600 }}>{card.step}</span>
-                  </div>
-                  <h3 style={{ fontSize: "20px", fontWeight: 700, margin: "0 0 8px", color: "var(--text)", letterSpacing: "-0.01em" }}>{card.title}</h3>
-                  <p style={{ color: "var(--text-secondary)", fontSize: "14px", lineHeight: 1.5 }}>{card.desc}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </Reveal>
-
-        <Reveal>
-          <section>
-            <div style={{ display: "flex", gap: "16px", justifyContent: "center", marginBottom: "80px" }}>
-              <Link
-                href="/dashboard"
-                className="btn-hover"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "14px 28px",
-                  fontSize: "15px",
-                  fontWeight: 600,
-                  color: "#ffffff",
-                  background: "var(--gradient-brand)",
-                  borderRadius: "10px",
-                  boxShadow: "0 4px 12px var(--accent-glow)",
-                  transition: "all 0.2s",
-                }}
-              >
-                Open Live Feed Dashboard
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              </Link>
-            </div>
-
-            {/* Card-based Stat Displays */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", marginTop: "40px" }}>
-              {[
-                { stat: "Continuous", label: "Stripe changelog monitoring", detail: "The engine polls the spec multiple times a day so we catch changes before they propagate to npm packages." },
-                { stat: "Zero Noise", label: "Patches only for breaking changes", detail: "Additive features are logged silently. You only get notified and receive pull requests for things that can break your build." },
-                { stat: "Automated", label: "Tested pull requests in minutes", detail: "The complete cycle from changelog update to a green CI check on a pull request completes in less than an hour." },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="hover-card"
-                  onClick={() => setActiveModal({ title: item.stat, content: item.detail })}
-                  style={{
-                    background: "var(--bg-elevated)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "16px",
-                    padding: "32px",
-                    textAlign: "center",
-                    boxShadow: "var(--shadow-panel)",
-                    position: "relative",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "36px",
-                      fontWeight: 800,
-                      background: "var(--gradient-brand)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      marginBottom: "8px",
-                      letterSpacing: "-0.03em",
-                    }}
+                <li key={i}>
+                  <button
+                    type="button"
+                    className={styles.step}
+                    onClick={() => setActiveModal({ title: card.title, content: card.detail })}
+                    aria-label={`${card.title} — read more`}
                   >
-                    {item.stat}
-                  </div>
-                  <div style={{ color: "var(--text-secondary)", fontSize: "14px", fontWeight: 550, letterSpacing: "0.01em" }}>{item.label}</div>
-                </div>
+                    <span className={styles.stepHead}>
+                      <span className={styles.stepIcon}>{card.icon}</span>
+                      <span className={styles.stepNum}>{card.num}</span>
+                    </span>
+                    <span className={styles.stepTitle}>{card.title}</span>
+                    <span className={styles.stepText}>{card.desc}</span>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </Reveal>
+
+        {/* Roadmap */}
+        <Reveal>
+          <section className={styles.section} id="roadmap">
+            <div className={styles.sectionHead}>
+              <p className={styles.kicker}>Timeline</p>
+              <h2 className={styles.sectionTitle}>Product Roadmap</h2>
+              <p className={styles.sectionSub}>
+                Our development journey and next steps.
+              </p>
+            </div>
+
+            <div className={styles.roadmapGrid}>
+              <div className={styles.roadmapCard}>
+                <span className={`${styles.roadmapPill} ${styles.roadmapNow}`}>NOW</span>
+                <h3>Stripe SDK detection</h3>
+              </div>
+              <div className={styles.roadmapCard}>
+                <span className={`${styles.roadmapPill} ${styles.roadmapNext}`}>NEXT</span>
+                <h3>Expand to additional high-traffic APIs</h3>
+              </div>
+              <div className={styles.roadmapCard}>
+                <span className={`${styles.roadmapPill} ${styles.roadmapLater}`}>LATER</span>
+                <h3>Full multi-provider coverage</h3>
+              </div>
+            </div>
+          </section>
+        </Reveal>
+
+        {/* Features bento */}
+        <Reveal>
+          <section className={styles.section} id="features">
+            <div className={styles.sectionHead}>
+              <p className={styles.kicker}>Capabilities</p>
+              <h2 className={styles.sectionTitle}>Built for production</h2>
+            </div>
+
+            <div className={styles.bento}>
+              {[
+                { span: 2, stat: "Continuous", label: "Stripe changelog monitoring", detail: "The engine polls the spec multiple times a day so we catch changes before they propagate to npm packages." },
+                { span: 2, stat: "Zero Noise", label: "Patches only for breaking changes", detail: "Additive features are logged silently. You only get notified and receive pull requests for things that can break your build." },
+                { span: 2, stat: "Automated", label: "Tested PRs in minutes", detail: "The complete cycle from changelog update to a green CI check on a pull request completes in less than an hour." },
+              ].map((item, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={`${styles.bentoCard} ${styles.bentoCard2}`}
+                  onClick={() => setActiveModal({ title: item.stat, content: item.detail })}
+                  aria-label={`${item.stat} — ${item.label}`}
+                >
+                  <span className={styles.bentoStat}>{item.stat}</span>
+                  <span className={styles.bentoLabel}>{item.label}</span>
+                </button>
               ))}
             </div>
           </section>
         </Reveal>
-      </main>
 
-      {/* Detail Popup Modal */}
+        {/* Severity grid */}
+        <Reveal>
+          <section className={styles.section}>
+            <div className={styles.sectionHead}>
+              <p className={styles.kicker}>Classification</p>
+              <h2 className={styles.sectionTitle}>Every change has a severity</h2>
+            </div>
+
+            <div className={styles.sevGrid}>
+              <div className={`${styles.sevCard} ${styles.sevCardBreaking}`}>
+                <span className={`${styles.sevPill} ${styles.sevBreaking}`}>BREAKING</span>
+                <h3>Breaking</h3>
+                <p>Removes fields, changes types, or invalidates existing call patterns. Requires immediate action.</p>
+              </div>
+              <div className={`${styles.sevCard} ${styles.sevCardDep}`}>
+                <span className={`${styles.sevPill} ${styles.sevDep}`}>DEPRECATION</span>
+                <h3>Deprecation</h3>
+                <p>Fields or endpoints marked for removal in a future version. Plan migration before EOL.</p>
+              </div>
+              <div className={`${styles.sevCard} ${styles.sevCardAdd}`}>
+                <span className={`${styles.sevPill} ${styles.sevAdd}`}>ADDITIVE</span>
+                <h3>Additive</h3>
+                <p>New endpoints, fields, or enum values. Safe to adopt when ready, no urgency.</p>
+              </div>
+            </div>
+          </section>
+        </Reveal>
+
+        {/* CTA */}
+        <Reveal>
+          <section className={styles.ctaBand}>
+            <div className={styles.ctaGlow} />
+            <h2 className={styles.ctaTitle}>
+              Stop chasing API changes. <br />Let them chase you.
+            </h2>
+            <p className={styles.ctaSub}>
+              Join the waitlist for early access. We'll email you when your slot opens.
+            </p>
+            <div className={styles.ctaForm}>
+              <WaitlistForm />
+            </div>
+          </section>
+        </Reveal>
+
+        {/* Footer */}
+        <footer className={styles.footer}>
+          <div className={styles.footerInner}>
+            <div className={styles.footerBrand}>
+              <span className={styles.brandMark} />
+              API Sentinel
+            </div>
+            <div className={styles.footerLinks}>
+              <Link href="/privacy">Privacy</Link>
+              <Link href="/terms">Terms</Link>
+              <Link href="/support">Support</Link>
+            </div>
+            <p className={styles.disclaimer}>
+              api-sentinel is an independent tool for Stripe developers. Not affiliated with or endorsed by Stripe.
+            </p>
+            <span className={styles.footerCopy}>&copy; {new Date().getFullYear()}</span>
+          </div>
+        </footer>
+      </div>
+
+      {/* Modal */}
       {activeModal && (
         <div
+          className={styles.modalBackdrop}
           onClick={() => setActiveModal(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.7)",
-            backdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-            animation: "fadeIn 0.2s ease-out",
-          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
         >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "var(--bg-elevated)",
-              border: "1px solid var(--border-strong)",
-              borderRadius: "16px",
-              padding: "32px",
-              maxWidth: "480px",
-              width: "calc(100% - 32px)",
-              position: "relative",
-              boxShadow: "var(--shadow-glow)",
-              color: "var(--text)",
-            }}
-          >
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <button
+              className={styles.modalClose}
               onClick={() => setActiveModal(null)}
-              style={{
-                position: "absolute",
-                top: "16px",
-                right: "16px",
-                background: "none",
-                border: "none",
-                color: "var(--text-muted)",
-                fontSize: "24px",
-                cursor: "pointer",
-                lineHeight: 1,
-              }}
+              aria-label="Close"
             >
               &times;
             </button>
-            <h3 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "12px", color: "var(--text)" }}>
+            <h3 id="modal-title" className={styles.modalTitle}>
               {activeModal.title}
             </h3>
-            <p style={{ color: "var(--text-secondary)", lineHeight: 1.6, fontSize: "15px" }}>
-              {activeModal.content}
-            </p>
+            <p className={styles.modalText}>{activeModal.content}</p>
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer style={{ borderTop: "1px solid var(--border)", padding: "40px 24px", marginTop: "100px", background: "var(--bg-inset)" }}>
-        <div style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontWeight: 700, color: "var(--text-secondary)", fontSize: "15px", letterSpacing: "-0.01em" }}>API Sentinel</span>
-          <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>&copy; {new Date().getFullYear()}</span>
-        </div>
-      </footer>
     </div>
   );
 }

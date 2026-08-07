@@ -1,0 +1,16 @@
+
+> api-sentinel@0.1.0 build
+> next build
+
+  Downloading swc package @next/swc-linux-x64-gnu... to /sessions/zen-tender-fermat/.cache/next-swc
+unhandledRejection TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: Error: getaddrinfo EAI_AGAIN registry.npmjs.org
+      at ignore-listed frames {
+    errno: -3001,
+    code: 'EAI_AGAIN',
+    syscall: 'getaddrinfo',
+    hostname: 'registry.npmjs.org'
+  }
+}
+EXIT=1

@@ -66,6 +66,7 @@ export async function GET(request: Request): Promise<Response> {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[cron] Pipeline run failed:", message);
+    console.error(`[ALERT] Cron execution failed: endpoint="/api/cron/stripe-poll" error="${message}"`);
     return Response.json(
       { ok: false, durationMs: Date.now() - startedAt, error: message },
       { status: 500 },

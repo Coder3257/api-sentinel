@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/stripe-poll",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/dependency-scan",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/dependency-patch",
+      "schedule": "0 2 * * *"
     }
   ]
 }

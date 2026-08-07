@@ -1,18 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import styles from "./WaitlistForm.module.css";
+
+type Status = "idle" | "loading" | "success" | "error";
 
 export default function WaitlistForm() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
+  const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const locked = status === "loading" || status === "success";
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!email || locked) return;
 
     setStatus("loading");
-    setErrorMessage("");
+    setMessage("");
 
     try {
       const res = await fetch("/api/waitlist", {
@@ -20,114 +25,57 @@ export default function WaitlistForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-
       const data = await res.json();
 
       if (!res.ok) {
         setStatus("error");
-        setErrorMessage(data.error || "Something went wrong.");
-      } else {
-        setStatus("success");
-        setEmail("");
+        setMessage(data.error || "That didn't go through. Try again.");
+        return;
       }
-    } catch (err: any) {
+
+      setStatus("success");
+      setMessage("You're on the list. We'll email you when your slot opens.");
+      setEmail("");
+    } catch {
       setStatus("error");
-      setErrorMessage("Connection error. Please try again.");
+      setMessage("Couldn't reach the server. Check your connection and try again.");
     }
-  };
+  }
 
   return (
-    <div style={{ maxWidth: "480px", margin: "0 auto", textAlign: "left" }}>
-      <form onSubmit={handleSubmit} style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "12px" }}>
+    <div className={styles.wrap}>
+      <form onSubmit={handleSubmit} className={styles.form} noValidate>
+        <label htmlFor="waitlist-email" className={styles.srOnly}>
+          Work email
+        </label>
         <input
+          id="waitlist-email"
+          className={styles.input}
           type="email"
           required
-          placeholder="Enter your work email"
+          autoComplete="email"
+          placeholder="you@company.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          disabled={status === "loading" || status === "success"}
-          style={{
-            flex: 1,
-            minWidth: "240px",
-            padding: "14px 16px",
-            background: "rgba(0, 0, 0, 0.2)",
-            border: "1px solid var(--border)",
-            borderRadius: "10px",
-            color: "var(--text)",
-            fontSize: "15px",
-            outline: "none",
-            transition: "border-color 0.2s",
-          }}
+          disabled={locked}
+          aria-invalid={status === "error"}
         />
-        <button
-          type="submit"
-          disabled={status === "loading" || status === "success"}
-          style={{
-            padding: "14px 24px",
-            background: status === "success" ? "var(--accent)" : "var(--gradient-brand)",
-            border: "none",
-            borderRadius: "10px",
-            color: "#ffffff",
-            fontWeight: 600,
-            fontSize: "15px",
-            cursor: (status === "loading" || status === "success") ? "not-allowed" : "pointer",
-            opacity: (status === "loading" || status === "success") ? 0.7 : 1,
-            boxShadow: "0 4px 12px var(--accent-glow)",
-            transition: "all 0.3s ease",
-          }}
-        >
-          {status === "loading" ? "Submitting..." : status === "success" ? "Joined!" : "Join Waitlist"}
+        <button type="submit" className={styles.submit} disabled={locked}>
+          {status === "loading" ? "Adding…" : status === "success" ? "Added" : "Get early access"}
         </button>
       </form>
-      
-      {/* Message Area with reserved height and opacity transition */}
-      <div 
-        style={{ 
-          minHeight: "56px", 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center",
-          transition: "opacity 0.4s ease",
-          opacity: status === "idle" || status === "loading" ? 0 : 1,
-        }}
+
+      {/* Height is reserved so the layout never shifts when a message lands. */}
+      <div
+        className={styles.messageSlot}
+        role="status"
+        aria-live="polite"
+        data-visible={status === "success" || status === "error"}
       >
-        {status === "success" && (
-          <div
-            style={{
-              background: "var(--accent-glow)",
-              border: "1px solid var(--border-strong)",
-              padding: "12px 18px",
-              borderRadius: "10px",
-              color: "var(--accent)",
-              fontWeight: 600,
-              fontSize: "14px",
-              width: "100%",
-              textAlign: "center",
-            }}
-          >
-            🎉 You're on the list! We'll reach out soon.
-          </div>
-        )}
-        {status === "error" && (
-          <div
-            style={{
-              background: "rgba(239, 68, 68, 0.1)",
-              border: "1px solid rgba(239, 68, 68, 0.2)",
-              padding: "12px 18px",
-              borderRadius: "10px",
-              color: "#ef4444",
-              fontWeight: 650,
-              fontSize: "14px",
-              width: "100%",
-              textAlign: "center",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px"
-            }}
-          >
-            <span>⚠️</span> {errorMessage}
-          </div>
+        {message && (
+          <p className={styles.message} data-tone={status === "error" ? "error" : "ok"}>
+            {message}
+          </p>
         )}
       </div>
     </div>

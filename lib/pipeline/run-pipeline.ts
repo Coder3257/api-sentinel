@@ -34,7 +34,7 @@ import {
   fetchNewChangelogEntries,
   type ChangelogEntry,
 } from "@/lib/stripe/changelog";
-import { scanRepoForStripeUsage } from "@/lib/github/repo-scanner";
+import { scanRepoForStripeUsage, isCallSiteAffected } from "@/lib/github/repo-scanner";
 import { generatePatches, type PatchInput } from "@/lib/ai/patch-generator";
 import { openFixPr, recordPullRequest } from "@/lib/github/pr-opener";
 
@@ -54,10 +54,10 @@ interface RepoRow {
 
 /** Terminal (or in-flight) state recorded for one repo × entry pairing. */
 export type ScanOutcome =
-  | "skipped" // no stripe usage in this repo
-  | "no_change" // patched but nothing changed → no PR
-  | "pr_opened" // PR successfully opened
-  | "failed"; // an error was recorded on the scan row
+  | "skipped"    // no stripe usage in this repo
+  | "no_change"  // patched but nothing actually changed → no PR
+  | "pr_opened"  // PR successfully opened
+  | "failed";    // an error was recorded on the scan row
 
 export interface ScanReport {
   repo: string; // "owner/name"
@@ -229,6 +229,7 @@ async function processRepoForEntry(
       repo.owner,
       repo.name,
       repo.default_branch,
+      entry.breakingChanges,
     );
     base.filesScanned = scanResult.files.length;
 
@@ -245,13 +246,42 @@ async function processRepoForEntry(
     });
 
     const changesSummary = summariseChanges(entry);
-    const patchInputs: PatchInput[] = scanResult.files.map((f) => ({
-      changes: entry.breakingChanges,
-      changesSummary,
-      file: { path: f.path, content: f.content },
-    }));
+    const patchInputs: PatchInput[] = scanResult.files.map((f) => {
+      const callSitesInput = f.callSites.map((site) => {
+        const matchingChange = entry.breakingChanges.find((c) =>
+          isCallSiteAffected(site.methodPath, c)
+        );
+        return {
+          methodPath: site.methodPath,
+          lineNumber: site.lineNumber,
+          snippet: site.snippet,
+          changeDescription: matchingChange?.description ?? entry.title,
+        };
+      });
+
+      return {
+        changes: entry.breakingChanges,
+        changesSummary,
+        file: { path: f.path, content: f.content },
+        callSites: callSitesInput,
+      };
+    });
 
     const patches = await generatePatches(patchInputs);
+    // Tag reasoning with matched SDK Type and map callSites to PatchResult
+    for (let i = 0; i < patches.length; i++) {
+      const p = patches[i];
+      const input = patchInputs[i];
+      const matchedFile = scanResult.files.find((f) => f.path === p.filePath);
+      if (matchedFile) {
+        p.reasoning = `**SDK Type**: ${matchedFile.matchedType}\n\n${p.reasoning}`;
+      }
+      p.callSites = input.callSites?.map((cs) => ({
+        methodPath: cs.methodPath,
+        lineNumber: cs.lineNumber,
+      }));
+    }
+
     const changed = patches.filter((p) => p.changed);
     base.filesChanged = changed.length;
 
@@ -267,6 +297,12 @@ async function processRepoForEntry(
     }
 
     // ── PR ────────────────────────────────────────────────────────────────────
+    // In-pipeline verification (git clone + npm install + test/build) has been
+    // removed: serverless functions cap out at 60 s (Hobby) / 300 s (Pro), and
+    // a clone + cold npm install alone typically takes 45–120 s, leaving no
+    // headroom for the Gemini call and PR creation. Verification responsibility
+    // belongs in the user's own CI (GitHub Actions, etc.) which runs after the
+    // draft PR is opened. The PR body says so explicitly.
     const pr = await openFixPr({
       installationId: repo.installation_id,
       owner: repo.owner,
@@ -302,7 +338,25 @@ async function processRepoForEntry(
       } catch (emailErr) {
         console.error(`[pipeline] Failed to send email alert for ${repoLabel}:`, emailErr);
       }
+
+      // Fire-and-forget Webhook Notification
+      try {
+        const { triggerWebhookIfNeeded } = await import("@/lib/webhook/notify");
+        triggerWebhookIfNeeded(repo.user_id, repo.id, {
+          repoId: repo.id,
+          repoName: repoLabel,
+          scanId: scan.id,
+          prUrl: pr.prUrl,
+          status: "done",
+          timestamp: new Date().toISOString(),
+        }).catch((err) => {
+          console.error(`[pipeline] Webhook trigger error for ${repoLabel}:`, err);
+        });
+      } catch (webhookErr) {
+        console.error(`[pipeline] Failed to initialize webhook trigger for ${repoLabel}:`, webhookErr);
+      }
     }
+
 
     return {
       ...base,
@@ -313,6 +367,7 @@ async function processRepoForEntry(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[pipeline] ${repoLabel} × ${entry.entryId} failed:`, message);
+    console.error(`[ALERT] Pipeline scan failed: scanId=${scan.id} entryId=${entry.entryId} repo=${repoLabel} error="${message}"`);
     await setScanStatus(supabase, scan.id, "failed", { error: message });
     return { ...base, outcome: "failed", error: message };
   }
@@ -329,14 +384,20 @@ async function processRepoForEntry(
  *   processed. Pass null on the first ever run to establish a baseline (records
  *   the latest tag, opens no PRs). In production the cron reads this from the
  *   most recent `stripe_changelogs` row.
+ * @param repoId  Optional. When set, scope the scan to this single DB repo id.
+ *   Used by the connect route to trigger an immediate scan for a newly-linked
+ *   repo without waiting for the daily cron.
  */
 export async function runPipeline(
   lastSeenEntryId: string | null,
+  repoId?: string,
 ): Promise<PipelineResult> {
   const supabase = getSupabaseClient();
 
   console.log(
-    `[pipeline] Starting run. lastSeenEntryId=${lastSeenEntryId ?? "(none — baseline)"}`,
+    `[pipeline] Starting run. lastSeenEntryId=${lastSeenEntryId ?? "(none — baseline)"}${
+      repoId ? ` repoId=${repoId}` : ""
+    }`,
   );
 
   // ── Step 1: new changelog entries ──────────────────────────────────────────
@@ -370,10 +431,16 @@ export async function runPipeline(
     return result;
   }
 
-  // ── Step 2: load installed repos ────────────────────────────────────────────
-  const { data: repos, error: reposErr } = await supabase
+  // ── Step 2: load installed repos (optionally scoped to one) ─────────────────
+  let reposQuery = supabase
     .from("repos")
     .select("id, github_repo_id, owner, name, installation_id, default_branch, user_id");
+
+  if (repoId) {
+    reposQuery = reposQuery.eq("id", repoId);
+  }
+
+  const { data: repos, error: reposErr } = await reposQuery;
 
   if (reposErr) {
     throw new Error(`Failed to load repos: ${reposErr.message}`);
@@ -406,8 +473,10 @@ export async function runPipeline(
 /**
  * Convenience: read the last-seen entry id from the DB, then run.
  * The most recently published changelog row is our high-water mark.
+ *
+ * @param repoId  Optional. When set, scope the scan to this single DB repo id.
  */
-export async function runPipelineFromDb(): Promise<PipelineResult> {
+export async function runPipelineFromDb(repoId?: string): Promise<PipelineResult> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("stripe_changelogs")
@@ -421,5 +490,5 @@ export async function runPipelineFromDb(): Promise<PipelineResult> {
   }
 
   const lastSeen = (data?.entry_id as string | undefined) ?? null;
-  return runPipeline(lastSeen);
+  return runPipeline(lastSeen, repoId);
 }
